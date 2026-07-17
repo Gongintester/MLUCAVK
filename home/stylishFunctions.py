@@ -41,7 +41,7 @@ def format_memory_from_mib(mib_val):
 def namespace_label_generator(namespace, total_cpu_m, formatted_memory):
     return f'''<
             <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
-            <TR><TD><FONT COLOR="green"><B>{namespace}</B></FONT></TD></TR>
+            <TR><TD><FONT COLOR="#8958bb"><B>{namespace}</B></FONT></TD></TR>
             <TR><TD><FONT COLOR="red">CPU {total_cpu_m:.1f}m</FONT></TD></TR>
             <TR><TD><FONT COLOR="#DAA520">RAM {formatted_memory}</FONT></TD></TR>
             </TABLE>
@@ -50,7 +50,7 @@ def namespace_label_generator(namespace, total_cpu_m, formatted_memory):
 def pod_label_generator(pod, pod_cpu, pod_mem):
     return f'''<
                 <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
-                <TR><TD><FONT COLOR="green"><B>{pod["name"]}</B></FONT></TD></TR>
+                <TR><TD><FONT COLOR="#00BA51"><B>{pod["name"]}</B></FONT></TD></TR>
                 <TR><TD><FONT COLOR="red">CPU {pod_cpu}</FONT></TD></TR>
                 <TR><TD><FONT COLOR="#DAA520">RAM {pod_mem}</FONT></TD></TR>
                 <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Node: {pod.get("node","-")}</FONT></TD></TR>
@@ -64,7 +64,7 @@ def generate_wraped_chart(strucData):
     for pod in strucData: namespaces[pod["namespace"]].append(pod)
 
     # Set the maximum number of pods allowed on a single horizontal row
-    MAX_PODS_PER_ROW = 5
+    MAX_PODS_PER_ROW = 4
 
     dot = graphviz.Digraph("k8s", format="png")
     dot.attr(rankdir="TB", bgcolor="white", nodesep="0.4", ranksep="0.8")
