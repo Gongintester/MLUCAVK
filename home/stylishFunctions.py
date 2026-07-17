@@ -92,7 +92,7 @@ def generate_wraped_chart(strucData):
                 pod_above_name = pods[i - MAX_PODS_PER_ROW]["name"]
                 dot.edge(pod_above_name, pod["name"], style="invis", weight="100")
 
-    dot.render("chart_wrap", cleanup=True)
+    dot.render("temp/chart_wrap", cleanup=True)
     print("Graph wraped generated successfully!")
 
 def generate_unwraped_chart(strucData):
@@ -140,5 +140,5 @@ def generate_unwraped_chart(strucData):
             # Create the visible line from the Namespace to the Pod
             dot.edge(namespace, pod["name"], penwidth="2")
 
-    dot.render("chart_unwrap", cleanup=True)
+    dot.render("temp/chart_unwrap", cleanup=True)
     print("Graph unwraped generated successfully!")

@@ -19,3 +19,6 @@ So only 11,71 % made by human
 
 ## `late readme update` Note
 <b>100% written by human</b>
+
+## `created temp folder` Note
+<b>100% written by human</b>

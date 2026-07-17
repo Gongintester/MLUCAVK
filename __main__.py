@@ -11,7 +11,6 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     pods = give_pods_cache()
-
     namespaces = defaultdict(list)
 
     for pod in pods: namespaces[pod["namespace"]].append(pod)
@@ -24,12 +23,12 @@ def index():
 @app.route("/chart/unwraped")
 def chart_unwraped():
     generate_unwraped_chart(give_pods_cache())
-    return send_file("./chart_unwrap.png")
+    return send_file("./temp/chart_unwrap.png")
 
 @app.route("/chart/wraped")
 def chart_wraped():
     generate_wraped_chart(give_pods_cache())
-    return send_file("./chart_wrap.png")
+    return send_file("./temp/chart_wrap.png")
 
 @app.route("/raw/pods")
 def raw_pods(): return jsonify(give_pods_cache())

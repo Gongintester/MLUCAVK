@@ -5,5 +5,4 @@
 *.pyc
 
 # remove save output files of project
-chart_wrap.png
-chart_unwrap.png
+/temp
