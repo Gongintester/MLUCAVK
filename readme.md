@@ -38,3 +38,6 @@ So only 11,71 % made by human
 ## `added parameterized generic type/generic type annotation` Note
 <b>99.8% written by human</b>
 - asked ai for official name of annotation types in python for commit name, but in code they were written by human
+
+## `added LICENSE` Note
+<b>Classic from github</b> so <i>-> 100% written by human</i>
