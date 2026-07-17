@@ -1,0 +1,9 @@
+# remove idea stuff
+/.vscode
+
+# remove python cache stuff 
+*.pyc
+
+# remove save output files of project
+chart_wrap.png
+chart_unwrap.png

@@ -1,0 +1,162 @@
+import graphviz
+from collections import defaultdict
+
+def parse_cpu(cpu:str):
+    """Convert Kubernetes CPU string to cores."""
+    if cpu.endswith("n"):
+        return float(cpu[:-1]) / 1_000_000_000
+    if cpu.endswith("u"):
+        return float(cpu[:-1]) / 1_000_000
+    if cpu.endswith("m"):
+        return float(cpu[:-1]) / 1000
+    return float(cpu)
+
+def parse_memory(mem):
+    """Convert Kubernetes memory string to bytes."""
+    units = {
+        "Ki": 1024,
+        "Mi": 1024 ** 2,
+        "Gi": 1024 ** 3,
+        "Ti": 1024 ** 4,
+    }
+
+    for suffix, multiplier in units.items():
+        if mem.endswith(suffix):
+            return float(mem[:-2]) * multiplier
+
+    return float(mem)
+
+def human_memory(num):
+    """Convert bytes to MiB/GiB."""
+    if num > 1024 ** 3:
+        return f"{num / 1024 ** 3:.1f} GiB"
+    return f"{num / 1024 ** 2:.1f} MiB"
+
+def parse_memory_to_mib(mem_str):
+    if not mem_str:
+        return 0.0
+    if mem_str.endswith(" GiB"):
+        return float(mem_str.replace(" GiB", "")) * 1024.0
+    elif mem_str.endswith(" MiB"):
+        return float(mem_str.replace(" MiB", ""))
+    elif mem_str.endswith(" KiB"):
+        return float(mem_str.replace(" KiB", "")) / 1024.0
+    return 0.0
+
+def format_memory_from_mib(mib_val):
+    if mib_val >= 1024.0:
+        return f"{mib_val / 1024.0:.2f} GiB"
+    return f"{mib_val:.1f} MiB"
+
+def generate_wraped_chart(strucData):
+    # --- Grouping Data ---
+    namespaces = defaultdict(list)
+    for pod in strucData: namespaces[pod["namespace"]].append(pod)
+
+    # --- Graph Generation ---
+    # Set the maximum number of pods allowed on a single horizontal row
+    MAX_PODS_PER_ROW = 5
+
+    dot = graphviz.Digraph("k8s", format="png")
+    dot.attr(rankdir="TB", bgcolor="white", nodesep="0.4", ranksep="0.8")
+    dot.attr("node", shape="box", style="rounded,filled", fillcolor="white", penwidth="2")
+
+    for namespace, pods in namespaces.items():
+
+        # Aggregate CPU and Memory safely
+        total_cpu_m = sum(parse_cpu(p.get("cpu", {}).get("usage", "0m")) for p in pods)
+        total_mem_mib = sum(parse_memory_to_mib(p.get("memory", {}).get("usage", "0 MiB")) for p in pods)
+        formatted_memory = format_memory_from_mib(total_mem_mib)
+
+        ns_label = f'''<
+            <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
+            <TR><TD><FONT COLOR="green"><B>{namespace}</B></FONT></TD></TR>
+            <TR><TD><FONT COLOR="red">CPU {total_cpu_m:.1f}m</FONT></TD></TR>
+            <TR><TD><FONT COLOR="#DAA520">RAM {formatted_memory}</FONT></TD></TR>
+            </TABLE>
+        >'''
+
+        dot.node(namespace, label=ns_label, fillcolor="#eeeeee")
+
+        for i, pod in enumerate(pods):
+            pod_cpu = pod.get("cpu", {}).get("usage", "0m")
+            pod_mem = pod.get("memory", {}).get("usage", "0 MiB")
+            
+            pod_label = f'''<
+                <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
+                <TR><TD><FONT COLOR="green"><B>{pod["name"]}</B></FONT></TD></TR>
+                <TR><TD><FONT COLOR="red">CPU {pod_cpu}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#DAA520">RAM {pod_mem}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Node: {pod.get("node","-")}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Status: {pod.get("status","-")}</FONT></TD></TR>
+                </TABLE>
+            >'''
+            
+            # 1. Create the pod node
+            dot.node(pod["name"], label=pod_label, fillcolor="#ffffff")
+            
+            # 2. Create the visible line from the Namespace to the Pod
+            dot.edge(namespace, pod["name"], penwidth="2")
+            
+            # 3. The wrapping trick: 
+            # If we are past the first row (i >= 5), draw an invisible line from the pod 
+            # directly above this one. This forces Graphviz to stack them into perfect columns.
+            if i >= MAX_PODS_PER_ROW:
+                pod_above_name = pods[i - MAX_PODS_PER_ROW]["name"]
+                dot.edge(pod_above_name, pod["name"], style="invis", weight="100")
+
+    dot.render("chart_wrap", cleanup=True)
+    print("Graph wraped generated successfully!")
+
+def generate_unwraped_chart(strucData):
+    # --- Grouping Data ---
+    namespaces = defaultdict(list)
+    for pod in strucData: namespaces[pod["namespace"]].append(pod)
+
+    # removed 3 lines
+
+    dot = graphviz.Digraph("k8s", format="png")
+    dot.attr(rankdir="TB", bgcolor="white", nodesep="0.4", ranksep="0.8")
+    dot.attr("node", shape="box", style="rounded,filled", fillcolor="white", penwidth="2")
+
+    for namespace, pods in namespaces.items():
+
+        # Aggregate CPU and Memory safely
+        total_cpu_m = sum(parse_cpu(p.get("cpu", {}).get("usage", "0m")) for p in pods)
+        total_mem_mib = sum(parse_memory_to_mib(p.get("memory", {}).get("usage", "0 MiB")) for p in pods)
+        formatted_memory = format_memory_from_mib(total_mem_mib)
+
+        ns_label = f'''<
+            <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
+            <TR><TD><FONT COLOR="green"><B>{namespace}</B></FONT></TD></TR>
+            <TR><TD><FONT COLOR="red">CPU {total_cpu_m:.1f}m</FONT></TD></TR>
+            <TR><TD><FONT COLOR="#DAA520">RAM {formatted_memory}</FONT></TD></TR>
+            </TABLE>
+        >'''
+
+        dot.node(namespace, label=ns_label, fillcolor="#eeeeee")
+
+        for pod in pods:
+            pod_cpu = pod.get("cpu", {}).get("usage", "0m")
+            pod_mem = pod.get("memory", {}).get("usage", "0 MiB")
+            
+            pod_label = f'''<
+                <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
+                <TR><TD><FONT COLOR="green"><B>{pod["name"]}</B></FONT></TD></TR>
+                <TR><TD><FONT COLOR="red">CPU {pod_cpu}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#DAA520">RAM {pod_mem}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Node: {pod.get("node","-")}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Status: {pod.get("status","-")}</FONT></TD></TR>
+                </TABLE>
+            >'''
+            
+            # 1. Create the pod node
+            dot.node(pod["name"], label=pod_label, fillcolor="#ffffff")
+            
+            # 2. Create the visible line from the Namespace to the Pod
+            dot.edge(namespace, pod["name"], penwidth="2")
+            
+            # 7 removed lines
+
+    dot.render("chart_unwrap", cleanup=True)
+    print("Graph unwraped generated successfully!")
