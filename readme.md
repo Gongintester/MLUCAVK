@@ -22,3 +22,9 @@ So only 11,71 % made by human
 
 ## `created temp folder` Note
 <b>100% written by human</b>
+
+## `created functions namespace_label_generator & pod_label_generator` Note
+<b>100% written by human</b>
+
+## `late readme update (once again)` Note
+<b>100% written by human</b>
