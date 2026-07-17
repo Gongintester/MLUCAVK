@@ -38,12 +38,31 @@ def format_memory_from_mib(mib_val):
     if mib_val >= 1024.0:return f"{mib_val / 1024.0:.2f} GiB"
     return f"{mib_val:.1f} MiB"
 
+def namespace_label_generator(namespace, total_cpu_m, formatted_memory):
+    return f'''<
+            <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
+            <TR><TD><FONT COLOR="green"><B>{namespace}</B></FONT></TD></TR>
+            <TR><TD><FONT COLOR="red">CPU {total_cpu_m:.1f}m</FONT></TD></TR>
+            <TR><TD><FONT COLOR="#DAA520">RAM {formatted_memory}</FONT></TD></TR>
+            </TABLE>
+        >'''
+
+def pod_label_generator(pod, pod_cpu, pod_mem):
+    return f'''<
+                <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
+                <TR><TD><FONT COLOR="green"><B>{pod["name"]}</B></FONT></TD></TR>
+                <TR><TD><FONT COLOR="red">CPU {pod_cpu}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#DAA520">RAM {pod_mem}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Node: {pod.get("node","-")}</FONT></TD></TR>
+                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Status: {pod.get("status","-")}</FONT></TD></TR>
+                </TABLE>
+            >'''
+
 def generate_wraped_chart(strucData):
     # Grouping Data
     namespaces = defaultdict(list)
     for pod in strucData: namespaces[pod["namespace"]].append(pod)
 
-    # Graph Generation
     # Set the maximum number of pods allowed on a single horizontal row
     MAX_PODS_PER_ROW = 5
 
@@ -57,13 +76,7 @@ def generate_wraped_chart(strucData):
         total_mem_mib = sum(parse_memory_to_mib(p.get("memory", {}).get("usage", "0 MiB")) for p in pods)
         formatted_memory = format_memory_from_mib(total_mem_mib)
 
-        ns_label = f'''<
-            <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
-            <TR><TD><FONT COLOR="green"><B>{namespace}</B></FONT></TD></TR>
-            <TR><TD><FONT COLOR="red">CPU {total_cpu_m:.1f}m</FONT></TD></TR>
-            <TR><TD><FONT COLOR="#DAA520">RAM {formatted_memory}</FONT></TD></TR>
-            </TABLE>
-        >'''
+        ns_label = namespace_label_generator(namespace, total_cpu_m, formatted_memory)
 
         dot.node(namespace, label=ns_label, fillcolor="#eeeeee")
 
@@ -71,15 +84,7 @@ def generate_wraped_chart(strucData):
             pod_cpu = pod.get("cpu", {}).get("usage", "0m")
             pod_mem = pod.get("memory", {}).get("usage", "0 MiB")
             
-            pod_label = f'''<
-                <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
-                <TR><TD><FONT COLOR="green"><B>{pod["name"]}</B></FONT></TD></TR>
-                <TR><TD><FONT COLOR="red">CPU {pod_cpu}</FONT></TD></TR>
-                <TR><TD><FONT COLOR="#DAA520">RAM {pod_mem}</FONT></TD></TR>
-                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Node: {pod.get("node","-")}</FONT></TD></TR>
-                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Status: {pod.get("status","-")}</FONT></TD></TR>
-                </TABLE>
-            >'''
+            pod_label = pod_label_generator(pod, pod_cpu, pod_mem)
             
             # create the pod node
             dot.node(pod["name"], label=pod_label, fillcolor="#ffffff")
@@ -110,29 +115,14 @@ def generate_unwraped_chart(strucData):
         total_mem_mib = sum(parse_memory_to_mib(p.get("memory", {}).get("usage", "0 MiB")) for p in pods)
         formatted_memory = format_memory_from_mib(total_mem_mib)
 
-        ns_label = f'''<
-            <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
-            <TR><TD><FONT COLOR="green"><B>{namespace}</B></FONT></TD></TR>
-            <TR><TD><FONT COLOR="red">CPU {total_cpu_m:.1f}m</FONT></TD></TR>
-            <TR><TD><FONT COLOR="#DAA520">RAM {formatted_memory}</FONT></TD></TR>
-            </TABLE>
-        >'''
-
+        ns_label = namespace_label_generator(namespace, total_cpu_m, formatted_memory)
         dot.node(namespace, label=ns_label, fillcolor="#eeeeee")
 
         for pod in pods:
             pod_cpu = pod.get("cpu", {}).get("usage", "0m")
             pod_mem = pod.get("memory", {}).get("usage", "0 MiB")
             
-            pod_label = f'''<
-                <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
-                <TR><TD><FONT COLOR="green"><B>{pod["name"]}</B></FONT></TD></TR>
-                <TR><TD><FONT COLOR="red">CPU {pod_cpu}</FONT></TD></TR>
-                <TR><TD><FONT COLOR="#DAA520">RAM {pod_mem}</FONT></TD></TR>
-                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Node: {pod.get("node","-")}</FONT></TD></TR>
-                <TR><TD><FONT COLOR="#666666" POINT-SIZE="10">Status: {pod.get("status","-")}</FONT></TD></TR>
-                </TABLE>
-            >'''
+            pod_label = pod_label_generator(pod, pod_cpu, pod_mem)
             
             # Create the pod node
             dot.node(pod["name"], label=pod_label, fillcolor="#ffffff")
