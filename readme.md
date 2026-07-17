@@ -13,3 +13,9 @@ So only 11,71 % made by human
 
 ## `add readme.md` Note
 <b>100% written by human</b> 
+
+## `refactor and removed useless stuff` Note
+<b>100% written by human</b>
+
+## `late readme update` Note
+<b>100% written by human</b>
