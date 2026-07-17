@@ -4,18 +4,15 @@ from kubernetes import client, config
 
 from home.stylishFunctions import human_memory,parse_cpu,parse_memory
 
-# Load Kubernetes config
-try:
-    config.load_incluster_config()
-except Exception:
-    config.load_kube_config()
+try: config.load_incluster_config()
+except Exception: config.load_kube_config()
 
 v1 = client.CoreV1Api()
 custom = client.CustomObjectsApi()
 
 pods_cache = []
 
-def refreshPods(time:int=45):
+def refreshPods(time:int=60):
     global pods_cache
 
     while True:
@@ -93,10 +90,8 @@ def refreshPods(time:int=45):
             pods_cache = new_cache
             print(f"Updated {len(pods_cache)} pods")
 
-        except Exception as e:
-            print(e)
+        except Exception as e: print(e)
 
         sleep(time)
 
-def give_pods_cache():
-    return pods_cache
+def give_pods_cache(): return pods_cache

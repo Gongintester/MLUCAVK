@@ -1,8 +1,7 @@
 import threading
 
 from collections import defaultdict
-from flask import Flask, render_template, jsonify, send_file
-# removed 3 line 
+from flask import Flask, render_template, jsonify, send_file 
 
 from home.kubeFunctions import refreshPods, give_pods_cache
 from home.stylishFunctions import generate_wraped_chart, generate_unwraped_chart
