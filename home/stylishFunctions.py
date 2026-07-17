@@ -1,14 +1,14 @@
 import graphviz
 from collections import defaultdict
 
-def parse_cpu(cpu:str):
+def parse_cpu(cpu:str) -> float:
     """Convert Kubernetes CPU string to cores."""
     if cpu.endswith("n"): return float(cpu[:-1]) / 1_000_000_000
     if cpu.endswith("u"): return float(cpu[:-1]) / 1_000_000
     if cpu.endswith("m"): return float(cpu[:-1]) / 1000
     return float(cpu)
 
-def parse_memory(mem):
+def parse_memory(mem:str) -> float:
     """Convert Kubernetes memory string to bytes."""
     units = {
         "Ki": 1024,
@@ -22,23 +22,23 @@ def parse_memory(mem):
 
     return float(mem)
 
-def human_memory(num):
-    """Convert bytes to MiB/GiB."""
-    if num > 1024 ** 3: return f"{num / 1024 ** 3:.1f} GiB"
-    return f"{num / 1024 ** 2:.1f} MiB"
-
-def parse_memory_to_mib(mem_str):
+def parse_memory_to_mib(mem_str:str|None) -> float:
     if not mem_str: return 0.0
     if mem_str.endswith(" GiB"): return float(mem_str.replace(" GiB", "")) * 1024.0
     elif mem_str.endswith(" MiB"): return float(mem_str.replace(" MiB", ""))
     elif mem_str.endswith(" KiB"): return float(mem_str.replace(" KiB", "")) / 1024.0
     return 0.0
 
-def format_memory_from_mib(mib_val):
+def human_memory(num:float|int) -> str:
+    """Convert bytes to MiB/GiB."""
+    if num > 1024 ** 3: return f"{num / 1024 ** 3:.1f} GiB"
+    return f"{num / 1024 ** 2:.1f} MiB"
+
+def format_memory_from_mib(mib_val:float|int) -> str:
     if mib_val >= 1024.0:return f"{mib_val / 1024.0:.2f} GiB"
     return f"{mib_val:.1f} MiB"
 
-def namespace_label_generator(namespace, total_cpu_m, formatted_memory):
+def namespace_label_generator(namespace:str, total_cpu_m:float, formatted_memory:str) -> str:
     return f'''<
             <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
             <TR><TD><FONT COLOR="#8958bb"><B>{namespace}</B></FONT></TD></TR>
@@ -47,7 +47,7 @@ def namespace_label_generator(namespace, total_cpu_m, formatted_memory):
             </TABLE>
         >'''
 
-def pod_label_generator(pod, pod_cpu, pod_mem):
+def pod_label_generator(pod:dict[str, str|int|float], pod_cpu:str, pod_mem:str) -> str:
     return f'''<
                 <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
                 <TR><TD><FONT COLOR="#00BA51"><B>{pod["name"]}</B></FONT></TD></TR>
@@ -58,13 +58,11 @@ def pod_label_generator(pod, pod_cpu, pod_mem):
                 </TABLE>
             >'''
 
-def generate_wraped_chart(strucData):
+def generate_wraped_chart(strucData:list[dict[str, str|int|float]], maxPodsPerRow:int=4) -> None:
     # Grouping Data
     namespaces = defaultdict(list)
     for pod in strucData: namespaces[pod["namespace"]].append(pod)
 
-    # Set the maximum number of pods allowed on a single horizontal row
-    MAX_PODS_PER_ROW = 4
 
     dot = graphviz.Digraph("k8s", format="png")
     dot.attr(rankdir="TB", bgcolor="white", nodesep="0.4", ranksep="0.8")
@@ -93,14 +91,14 @@ def generate_wraped_chart(strucData):
             dot.edge(namespace, pod["name"], penwidth="2")
             
             # The wrapping trick: 
-            if i >= MAX_PODS_PER_ROW:
-                pod_above_name = pods[i - MAX_PODS_PER_ROW]["name"]
+            if i >= maxPodsPerRow:
+                pod_above_name = pods[i - maxPodsPerRow]["name"]
                 dot.edge(pod_above_name, pod["name"], style="invis", weight="100")
 
     dot.render("temp/chart_wrap", cleanup=True)
     print("Graph wraped generated successfully!")
 
-def generate_unwraped_chart(strucData):
+def generate_unwraped_chart(strucData:list[dict[str, str|int|float]]) -> None:
     # grouping Data
     namespaces = defaultdict(list)
     for pod in strucData: namespaces[pod["namespace"]].append(pod)

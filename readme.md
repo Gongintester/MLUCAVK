@@ -34,3 +34,7 @@ So only 11,71 % made by human
 
 ## `changed some values around` Note
 <b>100% written by human</b>
+
+## `added parameterized generic type/generic type annotation` Note
+<b>99.8% written by human</b>
+- asked ai for official name of annotation types in python for commit name, but in code they were written by human

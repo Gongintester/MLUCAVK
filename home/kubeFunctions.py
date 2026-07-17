@@ -1,4 +1,5 @@
 from time import sleep
+from typing import Never
 
 from kubernetes import client, config
 
@@ -10,9 +11,9 @@ except Exception: config.load_kube_config()
 v1 = client.CoreV1Api()
 custom = client.CustomObjectsApi()
 
-pods_cache = []
+pods_cache:list[dict[str, str|int|float]] = [] 
 
-def refreshPods(time:int=60):
+def refreshPods(time:int=60) -> Never:
     global pods_cache
 
     while True:
@@ -88,4 +89,4 @@ def refreshPods(time:int=60):
 
         sleep(time)
 
-def give_pods_cache(): return pods_cache
+def give_pods_cache() -> list[dict[str, str|int|float]]: return pods_cache

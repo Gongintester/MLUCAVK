@@ -1,7 +1,7 @@
 import threading
 
 from collections import defaultdict
-from flask import Flask, render_template, jsonify, send_file 
+from flask import Flask, Response, render_template, jsonify, send_file 
 
 from home.kubeFunctions import refreshPods, give_pods_cache
 from home.stylishFunctions import generate_wraped_chart, generate_unwraped_chart
@@ -21,17 +21,17 @@ def index():
     )
 
 @app.route("/chart/unwraped")
-def chart_unwraped():
+def chart_unwraped() -> Response:
     generate_unwraped_chart(give_pods_cache())
     return send_file("./temp/chart_unwrap.png")
 
 @app.route("/chart/wraped")
-def chart_wraped():
+def chart_wraped() -> Response:
     generate_wraped_chart(give_pods_cache())
     return send_file("./temp/chart_wrap.png")
 
 @app.route("/raw/pods")
-def raw_pods(): return jsonify(give_pods_cache())
+def raw_pods() -> Response: return jsonify(give_pods_cache())
 
 if __name__ == "__main__":
     threading.Thread(target=refreshPods, daemon=True).start()
