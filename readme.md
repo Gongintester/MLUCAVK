@@ -41,3 +41,6 @@ So only 11,71 % made by human
 
 ## `added LICENSE` Note
 <b>Classic from github</b> so <i>-> 100% written by human</i>
+
+## `added cache system` Note
+<b>100% written by human</b>

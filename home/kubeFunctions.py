@@ -89,4 +89,4 @@ def refreshPods(time:int=60) -> Never:
 
         sleep(time)
 
-def give_pods_cache() -> list[dict[str, str|int|float]]: return pods_cache
+def give_pods_bridge() -> list[dict[str, str|int|float]]: return pods_cache
