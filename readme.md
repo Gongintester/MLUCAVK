@@ -28,3 +28,6 @@ So only 11,71 % made by human
 
 ## `late readme update (once again)` Note
 <b>100% written by human</b>
+
+## `removed network section from refreshPods` Note
+<b>100% written by human</b>

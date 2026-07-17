@@ -78,12 +78,6 @@ def refreshPods(time:int=60):
                     "memory": {
                         "usage": human_memory(mem_used),
                         "percent": mem_percent
-                    },
-
-                    # Replace these with kubelet/Prometheus data
-                    "network": {
-                        "download": None,
-                        "upload": None
                     }
                 })
 
