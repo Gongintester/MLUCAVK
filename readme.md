@@ -44,3 +44,6 @@ So only 11,71 % made by human
 
 ## `added cache system` Note
 <b>100% written by human</b>
+
+## `bug fixes cache system` Note
+<b>100% written by human</b>
