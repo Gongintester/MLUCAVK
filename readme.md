@@ -47,3 +47,6 @@ So only 11,71 % made by human
 
 ## `bug fixes cache system` Note
 <b>100% written by human</b>
+
+## `stupid fix cachetools.func.ttl_cache(maxsize=1, ttl=60) -> cache` Note
+<b>100% written by human</b>

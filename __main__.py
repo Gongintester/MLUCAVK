@@ -11,7 +11,7 @@ from home.stylishFunctions import generate_wraped_chart, generate_unwraped_chart
 app = Flask(__name__)
 
 @app.route("/")
-@cachetools.func.ttl_cache(maxsize=1, ttl=60)
+@cache
 def index():
     pods = give_pods_bridge()
     namespaces = defaultdict(list)
